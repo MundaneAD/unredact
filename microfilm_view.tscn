@@ -4,9 +4,16 @@
 [ext_resource type="Texture2D" uid="uid://dgl10n2iuj0ic" path="res://icon.svg" id="1_xw6p3"]
 [ext_resource type="Texture2D" uid="uid://dumxkukd1acok" path="res://microfilm_big.png" id="3_3dyna"]
 [ext_resource type="Texture2D" uid="uid://bb4og426pg4ne" path="res://wordlist.png" id="4_a5djw"]
+[ext_resource type="Script" uid="uid://bpmmc44tvdfne" path="res://redacted_text.gd" id="6_586oa"]
+[ext_resource type="Script" uid="uid://bglid4layd6sq" path="res://redacted_page.gd" id="6_x88ma"]
+[ext_resource type="Texture2D" uid="uid://dqgts6qv78ajl" path="res://redactedfile_small.png" id="7_yr8kd"]
+[ext_resource type="PackedScene" uid="uid://5l4vabhha6ie" path="res://Unredacting Game Test.tscn" id="8_yr8kd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jmw6t"]
 size = Vector2(1183, 63)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c05vf"]
+size = Vector2(503, 304.90228)
 
 [node name="microfilm_view" type="Node2D" unique_id=639342175]
 script = ExtResource("1_jmw6t")
@@ -31,9 +38,9 @@ offset_bottom = 130.0
 text = "viewer"
 
 [node name="Label3" type="Label" parent="." unique_id=53792475]
-offset_left = 848.0
+offset_left = 692.0
 offset_top = 19.0
-offset_right = 900.0
+offset_right = 747.0
 offset_bottom = 42.0
 text = "^ BACK"
 
@@ -55,9 +62,140 @@ position = Vector2(362, 343)
 scale = Vector2(4.3697786, 4.5148387)
 texture = ExtResource("3_3dyna")
 
-[node name="Wordlist" type="Sprite2D" parent="." unique_id=878988644]
+[node name="Button" type="Button" parent="." unique_id=1865817825]
+offset_left = 547.0
+offset_top = 503.0
+offset_right = 596.0
+offset_bottom = 534.0
+text = "NEXT >"
+
+[node name="Button2" type="Button" parent="." unique_id=1425383916]
+offset_left = 131.0
+offset_top = 504.0
+offset_right = 180.0
+offset_bottom = 535.0
+text = "< PREV"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="." unique_id=515135147]
+offset_left = 124.0
+offset_top = 44.0
+offset_right = 609.0
+offset_bottom = 502.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="wordlist" type="Node2D" parent="." unique_id=1382156396]
+
+[node name="Wordlist" type="Sprite2D" parent="wordlist" unique_id=878988644]
 position = Vector2(719, 335)
 scale = Vector2(3.7137518, 3.7137518)
 texture = ExtResource("4_a5djw")
 
+[node name="wordlist_bank" type="HFlowContainer" parent="wordlist" unique_id=486667797]
+custom_minimum_size = Vector2(2.25, 3.22)
+offset_left = 809.0
+offset_top = 99.0
+offset_right = 1033.0
+offset_bottom = 640.0
+
+[node name="search" parent="." unique_id=80632552 node_paths=PackedStringArray("redacted_text") instance=ExtResource("8_yr8kd")]
+custom_minimum_size = Vector2(3.74, 4.64)
+offset_left = 22.0
+offset_top = 64.0
+offset_right = 610.0
+offset_bottom = 542.0
+redacted_text = NodePath("../redacted_text/ColorRect/ScrollContainer/Control")
+
+[node name="redacted_text" type="Node2D" parent="." unique_id=1043964672]
+position = Vector2(38.845665, 627.0978)
+scale = Vector2(0.9999999, 0.9999999)
+script = ExtResource("6_x88ma")
+
+[node name="page_open" type="Area2D" parent="redacted_text" unique_id=338241822]
+position = Vector2(159, 20)
+
+[node name="Icon" type="Sprite2D" parent="redacted_text/page_open" unique_id=1580961931]
+visible = false
+position = Vector2(93, 365.99997)
+scale = Vector2(3.88, 5.9999986)
+texture = ExtResource("1_xw6p3")
+
+[node name="RedactedfileSmall" type="Sprite2D" parent="redacted_text/page_open" unique_id=449881444]
+position = Vector2(15, 345)
+scale = Vector2(3.1978393, 3.1978393)
+texture = ExtResource("7_yr8kd")
+
+[node name="Label" type="Label" parent="redacted_text/page_open" unique_id=1015177492]
+visible = false
+offset_left = -52.0
+offset_top = 6.0
+offset_right = 78.0
+offset_bottom = 29.0
+text = "redacted aasasasasa asasd asas"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="redacted_text/page_open" unique_id=201594413]
+position = Vector2(92.5, 135.45123)
+shape = SubResource("RectangleShape2D_c05vf")
+
+[node name="ColorRect" type="ColorRect" parent="redacted_text" unique_id=1094627096]
+offset_left = 40.15434
+offset_top = 67.902214
+offset_right = 495.1544
+offset_bottom = 665.9023
+mouse_filter = 2
+color = Color(0.9195771, 0.9003182, 0.8682696, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="redacted_text/ColorRect" unique_id=2115072971]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+mouse_filter = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+scroll_hint_mode = 1
+
+[node name="Control" type="VBoxContainer" parent="redacted_text/ColorRect/ScrollContainer" unique_id=1382082970 node_paths=PackedStringArray("_word_bank")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("6_586oa")
+source_text = "
+A New Study Has Revealed the Best Theory Yet for the Dyatlov Pass Incident
+The facts:
+On the evening of February 2nd, 1959, a group of nine Soviet hikers led by Igor Dyatlov died near their campsite next to Otorten Mountain, a dangerous pass in Northern Russia.
+Days before, on January 27 1959, a group of ten hikers began their trek toward Gora Otorten. 
+On January 28, one member, [[Yuri Yudin]], who had several health ailments (including rheumatism and a congenital heart defect), turned back because of knee and joint pain that made him unable to continue the hike. The remaining nine hikers continued the trek.
+On February 26th the horrific state of the campsite was discovered by a rescue team. The tent had been [[cut open]] [[from the inside]]. Footsteps from the camp showed that all group members left the campsite of their own accord, on foot.
+At the forest's edge, under a large Siberian pine, the searchers found the first two bodies, those of Krivonishenko and Doroshenko, dressed [[only in underwear]]. 
+Between the pine and the camp, the searchers found three more corpses: Dyatlov, Kolmogorova and Slobodin, who died in poses suggesting they were attempting to return to the tent. They were found at distances of 300, 480, and 630 metres from the tree.
+One of them, Slobodin, had a fractured [[skull]], however doctors at the time determined that the cause of death for all five was hypothermia.
+Finding the remaining four travelers took more than two months. On May 4th, Dubinina, Zolotaryov, Kolevatov and Thibeaux-Brignolles were finally found under four metres of snow in a ravine 75 metres further into the woods from the pine tree. 
+The four corpses were found wearing [[the clothes of the previous bodies]]. Even more bizarrely, these clothes were tested and found to be [[radioactive]].
+All four bodies found at the bottom of the creek in a running stream of water had soft tissue damage to their head and face. For example, Dubinina was missing her [[tongue]], eyes, part of the lips, as well as facial tissue and a fragment of skullbone, while Zolotaryov had his eyeballs missing, and Aleksander Kolevatov his [[eyebrows]].
+There were no indications of other people nearby on Otorten mountain apart from the nine travelers.
+Experts stated that the fatal injuries of the three bodies could not have been caused by human beings, \"because the force of the blows had been too strong and no soft tissue had been damaged\".
+International Science Times posited that the hikers' deaths were caused by hypothermia, which can induce a behavior known as [[paradoxical undressing]] in which hypothermic subjects remove their clothes in response to perceived feelings of burning warmth. It is undisputed that six of the nine hikers died of hypothermia. However, others in the group appear to have acquired additional clothing (from those who had already died), which suggests that they were of a sound enough mind to try to add layers.
+The location of the incident did not have any obvious signs of an [[avalanche]] having occurred. An avalanche would have left certain patterns and debris distributed over a wide area. Moreover, each member of the group was an experienced Grade II-hiker with ski tour experience and knowledge on how to set up camp away from avalanche areas. Finally, the bodies found within a month of the event were covered with a shallow layer of snow, again disputing an avalanche.
+Yudin, the hiker who turned back, helped identify items found at the site, but there were some items that he couldn't identify. Two of which were a [[cloth and glasses]] that he claimed looked to be of US military origin.
+After the investigation was publicized, a separate group of hikers came forward, stating that on the nights of February 1st and 2nd about 50 kilometers South of the Dyatlov group, they saw strange orange spheres in the night sky in the direction of Otorten.
+
+Current research
+There was not a single drop of blood in or near the tent, indicating that the hikers fled before sustaining fatal injuries.
+In recent years, previously classified documents from the [[United States military]] have surfaced. These documents reference weapons testing conducted in the northern Ural region during the late 1950s.
+On the night of February 2nd, 1959, experimental delivery systems allegedly dispersed compounds including [[LSD]] and 3-Quinuclidinyl benzilate (BZ), substances known to cause paranoia, confusion, and disorientation.
+Independent researchers have proposed that low-level exposure to [[psychoactive agents]] or radioactive material could explain the hikers’ erratic behavior, sudden evacuation of the tent, and impaired survival decisions.
+Advanced computer simulations suggest that panic-induced flight into sub-zero conditions, followed by disorganized attempts at shelter-building, may have resulted in fatal injuries sustained during falls into the ravine.
+However, no official records conclusively confirm that such testing occurred in direct proximity to the hikers’ camp.
+Whether the tragedy was the result of natural forces, classified experimentation, internal conflict, or a combination of factors remains officially unresolved.
+
+
+"
+_word_bank = NodePath("../../../../wordlist/wordlist_bank")
+
 [connection signal="input_event" from="back_button" to="." method="_on_back_button_input_event"]
+[connection signal="input_event" from="redacted_text/page_open" to="redacted_text" method="_on_page_open_input_event"]

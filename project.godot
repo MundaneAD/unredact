@@ -17,9 +17,12 @@ config/icon="res://icon.svg"
 
 [display]
 
+window/size/viewport_width=2000
+window/size/viewport_height=1200
 window/stretch/mode="viewport"
 window/stretch/scale_mode="integer"
 
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)

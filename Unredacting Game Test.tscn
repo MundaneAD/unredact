@@ -1,0 +1,105 @@
+[gd_scene format=3 uid="uid://5l4vabhha6ie"]
+
+[ext_resource type="Script" uid="uid://fo233gbrtfbf" path="res://scripts/library.gd" id="1_ksiik"]
+
+[node name="Control" type="Control" unique_id=80632552 node_paths=PackedStringArray("search_input", "search_button", "results_list", "evidence_title", "evidence_body", "status_label", "next_chapter_button")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 26.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ksiik")
+search_input = NodePath("PanelContainer/VBoxContainer/HBoxContainer/SearchInput")
+search_button = NodePath("PanelContainer/VBoxContainer/HBoxContainer/SearchButton")
+results_list = NodePath("PanelContainer/VBoxContainer/ResultsList")
+evidence_title = NodePath("PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer/EvidenceTitle")
+evidence_body = NodePath("PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer/EvidenceBody")
+status_label = NodePath("PanelContainer/VBoxContainer/StatusLabel")
+next_chapter_button = NodePath("PanelContainer/VBoxContainer/NextChapterButton")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=364063411]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 96.0
+offset_top = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=230282858]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="PanelContainer/VBoxContainer" unique_id=538206424]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Status..."
+
+[node name="ArchiveSearch" type="Label" parent="PanelContainer/VBoxContainer" unique_id=766200653]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=1180790171]
+layout_mode = 2
+
+[node name="SearchInput" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1582128083]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Type something here..."
+
+[node name="SearchButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1096699948]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Search"
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1649005451]
+layout_mode = 2
+
+[node name="WordStack" type="Label" parent="PanelContainer/VBoxContainer" unique_id=330154580]
+visible = false
+layout_mode = 2
+text = "Word Sack"
+
+[node name="Evidence_Panel" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=841293571]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/Evidence_Panel" unique_id=2002206489]
+layout_mode = 2
+
+[node name="EvidenceTitle" type="Label" parent="PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer" unique_id=1172617667]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="EvidenceBody" type="RichTextLabel" parent="PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer" unique_id=1983922806]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer" unique_id=1539007748]
+layout_mode = 2
+
+[node name="WordStackContainer" type="FlowContainer" parent="PanelContainer/VBoxContainer" unique_id=406527238]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="ResultsLabel" type="Label" parent="PanelContainer/VBoxContainer" unique_id=1338977426]
+layout_mode = 2
+
+[node name="ResultsList" type="ItemList" parent="PanelContainer/VBoxContainer" unique_id=169498901]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.39
+
+[node name="NextChapterButton" type="Button" parent="PanelContainer/VBoxContainer" unique_id=234767748]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+text = "Next Chapter..."

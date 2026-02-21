@@ -7,26 +7,23 @@
 [ext_resource type="PackedScene" uid="uid://c4n1yjgc3ryno" path="res://microfilm_view.tscn" id="4_1bvp3"]
 [ext_resource type="Texture2D" uid="uid://dgl10n2iuj0ic" path="res://icon.svg" id="5_lquwl"]
 [ext_resource type="Texture2D" uid="uid://dcdbmw6hq1jaw" path="res://tannie.png" id="6_5vw27"]
-[ext_resource type="Script" uid="uid://bglid4layd6sq" path="res://redacted_page.gd" id="6_7mycd"]
+[ext_resource type="AudioStream" uid="uid://b4vferv6p5yja" path="res://Russian Mystery Ambience.mp3" id="9_4c57u"]
 [ext_resource type="Texture2D" uid="uid://nrd5ayj8obxx" path="res://microfilm_small.png" id="9_kek77"]
-[ext_resource type="Texture2D" uid="uid://dqgts6qv78ajl" path="res://redactedfile_small.png" id="10_4c57u"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ig7tw"]
 size = Vector2(334, 268)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_7mycd"]
-size = Vector2(503, 133)
-
 [node name="Main" type="Node2D" unique_id=19023574]
+scale = Vector2(1.8133302, 1.8133302)
 script = ExtResource("1_7mycd")
 
 [node name="ArchiveBg" type="Sprite2D" parent="." unique_id=1522797132]
-position = Vector2(540, 326)
+position = Vector2(585, 329)
 scale = Vector2(3.623686, 3.472421)
 texture = ExtResource("2_272bh")
 
 [node name="microfilm_viewer" parent="." unique_id=450030852 instance=ExtResource("1_ig7tw")]
-position = Vector2(213, 375)
+position = Vector2(318, 377)
 
 [node name="Label" parent="microfilm_viewer" index="0" unique_id=1826317297]
 visible = false
@@ -92,39 +89,15 @@ shape = SubResource("RectangleShape2D_ig7tw")
 [node name="microfilm_view" parent="." unique_id=639342175 instance=ExtResource("4_1bvp3")]
 position = Vector2(-3, 665)
 
-[node name="redacted_text" type="Node2D" parent="." unique_id=157428480]
-position = Vector2(36, 555)
-script = ExtResource("6_7mycd")
-
-[node name="page_open" type="Area2D" parent="redacted_text" unique_id=1384055725]
-position = Vector2(159, 20)
-
-[node name="Icon" type="Sprite2D" parent="redacted_text/page_open" unique_id=1882735104]
-position = Vector2(93, 365.99997)
-scale = Vector2(3.88, 5.9999986)
-texture = ExtResource("5_lquwl")
-
-[node name="RedactedfileSmall" type="Sprite2D" parent="redacted_text/page_open" unique_id=630420188]
-position = Vector2(15, 345)
-scale = Vector2(3.1978393, 3.1978393)
-texture = ExtResource("10_4c57u")
-
-[node name="Label" type="Label" parent="redacted_text/page_open" unique_id=627572364]
-offset_left = -52.0
-offset_top = 6.0
-offset_right = 78.0
-offset_bottom = 29.0
-text = "redacted page"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="redacted_text/page_open" unique_id=1171594148]
-position = Vector2(92.5, 49.5)
-shape = SubResource("RectangleShape2D_7mycd")
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=166220812]
+stream = ExtResource("9_4c57u")
+autoplay = true
+parameters/looping = true
 
 [connection signal="input_event" from="microfilm_viewer" to="." method="_on_microfilm_viewer_input_event"]
 [connection signal="input_event" from="microfilm_viewer" to="TannieSpeechBox" method="_on_microfilm_viewer_input_event"]
 [connection signal="text_submitted" from="TannieSpeechBox/speechbox/search_input" to="TannieSpeechBox" method="_on_search_input_text_submitted"]
 [connection signal="input_event" from="TannieSpeechBox/tannie" to="TannieSpeechBox" method="_on_tannie_input_event"]
 [connection signal="exit_pressed" from="microfilm_view" to="." method="_on_microfilm_view_exit_pressed"]
-[connection signal="input_event" from="redacted_text/page_open" to="redacted_text" method="_on_page_open_input_event"]
 
 [editable path="microfilm_viewer"]
