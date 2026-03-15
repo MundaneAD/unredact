@@ -69,7 +69,7 @@ jobs:
 
       - name: Run db_builder
         run: |
-          godot --headless --path . --script scripts/db_builder_ci.gd
+          godot --headless --path . --script ci/db_builder_ci.gd
           echo "Exit code: $?"
       - name: Export game (HTML5)
         run: |
