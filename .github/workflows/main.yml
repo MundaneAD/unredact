@@ -8,7 +8,7 @@ on:
   workflow_dispatch: # Also allows manual triggering from the GitHub UI
 
 env:
-  GODOT_VERSION: "4.3"          # ← Change to your Godot version
+  GODOT_VERSION: "4.6.1"          # ← Change to your Godot version
   EXPORT_NAME: "index"        # ← Change to your game's name (used for output files)
   ITCH_USER: "jamesridley"  # ← Your itch.io username
   ITCH_GAME: "unredact"      # ← Your itch.io game slug (from the URL)
