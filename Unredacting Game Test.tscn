@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://5l4vabhha6ie"]
 
 [ext_resource type="Script" uid="uid://fo233gbrtfbf" path="res://scripts/library.gd" id="1_ksiik"]
+[ext_resource type="Script" uid="uid://bvq7w7aufh3k2" path="res://evidence_body.gd" id="2_5mysl"]
 
-[node name="Control" type="Control" unique_id=80632552 node_paths=PackedStringArray("search_input", "search_button", "results_list", "evidence_title", "evidence_body", "status_label", "next_chapter_button")]
+[node name="Control" type="Control" unique_id=80632552 node_paths=PackedStringArray("search_input", "search_button", "results_list", "evidence_title", "evidence_body", "status_label")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,7 +19,6 @@ results_list = NodePath("PanelContainer/VBoxContainer/ResultsList")
 evidence_title = NodePath("PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer/EvidenceTitle")
 evidence_body = NodePath("PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer/EvidenceBody")
 status_label = NodePath("PanelContainer/VBoxContainer/StatusLabel")
-next_chapter_button = NodePath("PanelContainer/VBoxContainer/NextChapterButton")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=364063411]
 layout_mode = 1
@@ -81,6 +81,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+script = ExtResource("2_5mysl")
 
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/Evidence_Panel/VBoxContainer" unique_id=1539007748]
 layout_mode = 2
@@ -96,7 +97,7 @@ layout_mode = 2
 [node name="ResultsList" type="ItemList" parent="PanelContainer/VBoxContainer" unique_id=169498901]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.39
+size_flags_stretch_ratio = 0.22
 
 [node name="NextChapterButton" type="Button" parent="PanelContainer/VBoxContainer" unique_id=234767748]
 visible = false

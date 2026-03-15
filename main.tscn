@@ -7,14 +7,20 @@
 [ext_resource type="PackedScene" uid="uid://c4n1yjgc3ryno" path="res://microfilm_view.tscn" id="4_1bvp3"]
 [ext_resource type="Texture2D" uid="uid://dgl10n2iuj0ic" path="res://icon.svg" id="5_lquwl"]
 [ext_resource type="Texture2D" uid="uid://dcdbmw6hq1jaw" path="res://tannie.png" id="6_5vw27"]
+[ext_resource type="FontFile" uid="uid://dw87kbqa3c5kn" path="res://fonts/IMFellDWPica-Regular.ttf" id="7_4c57u"]
 [ext_resource type="AudioStream" uid="uid://b4vferv6p5yja" path="res://Russian Mystery Ambience.mp3" id="9_4c57u"]
 [ext_resource type="Texture2D" uid="uid://nrd5ayj8obxx" path="res://microfilm_small.png" id="9_kek77"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_kek77"]
+
+[sub_resource type="Theme" id="Theme_efxa6"]
+default_font = ExtResource("7_4c57u")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ig7tw"]
 size = Vector2(334, 268)
 
 [node name="Main" type="Node2D" unique_id=19023574]
-scale = Vector2(1.8133302, 1.8133302)
+material = SubResource("CanvasItemMaterial_kek77")
 script = ExtResource("1_7mycd")
 
 [node name="ArchiveBg" type="Sprite2D" parent="." unique_id=1522797132]
@@ -32,8 +38,8 @@ visible = false
 position = Vector2(120, 34)
 
 [node name="MicrofilmSmall" type="Sprite2D" parent="microfilm_viewer" unique_id=2105892081]
-position = Vector2(143, 73)
-scale = Vector2(2.843824, 2.6575048)
+position = Vector2(159, 81.999985)
+scale = Vector2(3.3984556, 3.0784388)
 texture = ExtResource("9_kek77")
 
 [node name="Icon2" type="Sprite2D" parent="microfilm_viewer" unique_id=30784691]
@@ -46,17 +52,27 @@ texture = ExtResource("5_lquwl")
 position = Vector2(672, 163)
 script = ExtResource("2_0xm2m")
 speechbox = NodePath("speechbox")
+tut_script = Array[String](["Oh, you must be Aleksy. Welcome to the Moscow Archives.", "The microfilm viewer is over there. You can search the archives using key words.", "It's an old model, so you only get the first three search results. You can only view the paragraphs which match your search term, for security reasons of course.", "The agent told me you were working on the Dyatlov case? I heard some strange stories about their tent..."])
 
 [node name="speechbox" type="VBoxContainer" parent="TannieSpeechBox" unique_id=304485934]
 visible = false
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 333.0
+offset_bottom = 94.0
+theme = SubResource("Theme_efxa6")
+metadata/_edit_use_anchors_ = true
 
 [node name="Label" type="Label" parent="TannieSpeechBox/speechbox" unique_id=517221826]
+custom_minimum_size = Vector2(329.035, 4.18)
 layout_mode = 2
-text = "ugh another request?"
+size_flags_horizontal = 0
+size_flags_vertical = 1
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "ugh another request?a"
+autowrap_mode = 3
 
 [node name="search_input" type="LineEdit" parent="TannieSpeechBox/speechbox" unique_id=1283126535]
+visible = false
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 placeholder_text = "what ya lookin for?"
@@ -91,6 +107,7 @@ position = Vector2(-3, 665)
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=166220812]
 stream = ExtResource("9_4c57u")
+volume_db = -6.017
 autoplay = true
 parameters/looping = true
 

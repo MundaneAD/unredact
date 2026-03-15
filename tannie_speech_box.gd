@@ -2,6 +2,10 @@ extends Node2D
 
 @export var speechbox: VBoxContainer
 @onready var microfilm_view: Node2D = $"../microfilm_view"
+@onready var label: Label = $speechbox/Label
+
+@export_multiline() var tut_script: Array[String]
+var tut_idx = 0
 
 signal term_searched(text)
 
@@ -9,10 +13,13 @@ var engine := LibLib.new()
 var last_query: String = ""
 
 func speak(text: String) -> void:
-	pass
+	speechbox.visible = true
+	label.text = text
 
 func ask(text: String) -> void:
 	speechbox.visible = true
+	
+
 
 func _on_microfilm_viewer_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed:
@@ -20,7 +27,9 @@ func _on_microfilm_viewer_input_event(_viewport: Node, event: InputEvent, _shape
 
 func _on_tannie_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed:
-		ask("hi")
+		
+		speak(tut_script[tut_idx % len(tut_script)])
+		tut_idx += 1
 
 func _on_search_input_text_submitted(query: String) -> void:
 	last_query = query

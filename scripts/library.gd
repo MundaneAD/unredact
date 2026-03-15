@@ -1,80 +1,45 @@
+# evidence_ui.gd
 extends Control
 
-# ---- UI NodePaths (match your scene tree) ----
-var last_query: String = ""
-var CONTEXT_PARAGRAPHS := 0 # 0 = only matching paragraph, 1 = include prev/next too
-@export var search_input: LineEdit 
-@export var search_button: Button 
-@export var results_list: ItemList 
-@export var evidence_title: Label 
-@export var evidence_body: RichTextLabel 
-#@export var word_stack_container: FlowContainer 
+const DB_PATH := "res://data/doc_db.tres"
+
+@export var search_input: LineEdit
+@export var search_button: Button
+@export var results_list: ItemList
+@export var evidence_title: Label
+@export var evidence_body: RichTextLabel
 @export var redacted_text: RedactedLabel
 @export var status_label: Label
-@export var next_chapter_button: Button 
 
+var db: DocDB
+var index: Dictionary = {}
+var unlocked_words: Dictionary = {}
+var opened_docs: Dictionary = {}
+var last_query: String = ""
 
-# ---- Data ----
-# ---- Data ----
-var db = preload("res://scripts/evidence_db.gd").new()
-var docs: Array = []
-var docs_by_id: Dictionary = {}     # doc_id -> doc dictionary
-
-# Search indices
-var index: Dictionary = {}          # visible (<= current_chapter): key -> Array[doc_id]
-var full_index: Dictionary = {}     # all chapters: key -> Array[doc_id]
-
-var current_chapter: int = 0
-
-# State
-var unlocked_words: Dictionary = {}  # word -> true
-var opened_docs: Dictionary = {}     # doc_id -> true
-
-# Multi-word redactions / phrases you want searchable as-is
 var SPECIAL_PHRASES := [
-	"yuri yudin",
-	"cut open",
-	"from the inside",
-	"only in underwear",
-	"skull",
-	"the clothes of the previous bodies",
-	"radioactive",
-	"tongue",
-	"eyebrows",
-	"paradoxical undressing",
-	"avalanche",
-	"cloth and glasses",
-	"united states military",
-	"lsd",
-	"3-quinuclidinyl benzilate (bz)",
-	"psychoactive agents",
+	"yuri yudin", "cut open", "from the inside", "only in underwear",
+	"skull", "the clothes of the previous bodies", "radioactive",
+	"tongue", "eyebrows", "paradoxical undressing", "avalanche",
+	"cloth and glasses", "united states military", "lsd",
+	"3-quinuclidinyl benzilate (bz)", "psychoactive agents",
 	"radiological material"
 ]
 
 func _ready() -> void:
-	# Load docs from DB
-	docs = db.DOCS
-	for d in docs:
-		docs_by_id[str(d["id"])] = d
-
-	# Wire UI signals
-	search_button.pressed.connect(_on_search)
-	search_input.text_submitted.connect(_on_search_submitted)
-	next_chapter_button.pressed.connect(advance_chapter)
-
-	# Single click open
-	results_list.item_clicked.connect(func(i, _pos, _btn):
-		_on_result_activated(i)
-	)
-
+	db = ResourceLoader.load(DB_PATH)
 	_rebuild_index()
-	status_label.text = "Search the archive (Chapter %d). Try: tent" % (current_chapter + 1)
-	advance_chapter()
-	advance_chapter()
-	advance_chapter()
+	search_button.pressed.connect(_on_search)
+	search_input.text_submitted.connect(func(_t): _on_search())
+	results_list.item_clicked.connect(func(i, _pos, _btn):
+		_open_doc(results_list.get_item_metadata(i))
+	)
+	status_label.text = "Search the archive."
+	evidence_body.meta_clicked.connect(_on_meta_clicked)
 
-func _on_search_submitted(_text: String) -> void:
-	_on_search()
+func _on_meta_clicked(meta):
+	print(meta)
+	_unlock_word(meta)
 
 func _on_search() -> void:
 	var q := search_input.text.strip_edges().to_lower()
@@ -85,209 +50,152 @@ func _on_search() -> void:
 	last_query = q
 	results_list.clear()
 
-	# No visible results
 	if not index.has(q):
-		if full_index.has(q):
-			status_label.text = "Records found, but access is restricted (advance the story)."
-		else:
-			status_label.text = "No results for '%s'." % q
+		status_label.text = "No results for '%s'." % q
 		return
 
-	var doc_ids: Array = index[q]
+	# One entry per doc — first matching paragraph only
+	var seen_docs := {}
+	var hits: Array = []
+	for entry in index[q]:
+		if not seen_docs.has(entry.doc_key):
+			seen_docs[entry.doc_key] = true
+			hits.append(entry)
 
-	# Sort by title
-	doc_ids.sort_custom(func(a, b):
-		return str(docs_by_id[str(a)].get("title", "")) < str(docs_by_id[str(b)].get("title", ""))
-	)
+	hits.sort_custom(func(a, b): return str(db.docs[a.doc_key].title) < str(db.docs[b.doc_key].title))
 
-	for doc_id in doc_ids:
-		var d: Dictionary = docs_by_id[str(doc_id)]
-		results_list.add_item(str(d.get("title", "Evidence")))
-		results_list.set_item_metadata(results_list.item_count - 1, str(doc_id))
+	for hit in hits:
+		var doc: Doc = db.docs[hit.doc_key]
+		results_list.add_item(doc.title)
+		results_list.set_item_metadata(results_list.item_count - 1, hit)
 
-	status_label.text = "%d result(s) for '%s'." % [doc_ids.size(), q]
+	status_label.text = "%d result(s) for '%s'." % [hits.size(), q]
 
-func _on_result_activated(item_index: int) -> void:
-	var doc_id = results_list.get_item_metadata(item_index)
-	if doc_id == null:
-		return
+func _open_doc(hit: Dictionary) -> void:
+	var key: StringName = hit.doc_key
+	var par_idx: int = hit.par_idx
 
-	_open_doc(str(doc_id))
-
-func _open_doc(doc_id: String) -> void:
-	if not docs_by_id.has(doc_id):
+	if not db.docs.has(key):
 		status_label.text = "Could not open document."
 		return
 
-	var d: Dictionary = docs_by_id[doc_id]
-	opened_docs[doc_id] = true
+	var doc: Doc = db.docs[key]
+	opened_docs[str(key)] = true
+	evidence_title.text = doc.title
 
-	evidence_title.text = str(d.get("title", "Evidence"))
+	var par := doc.paragraphs[par_idx].strip_edges()
+	var newly_revealed: Array[String] = []
+	var seen := {}
+	for w in doc.reveals_words[par_idx]:
+		var wl := str(w).to_lower()
+		if not unlocked_words.has(wl) and not seen.has(wl):
+			seen[wl] = true
+			newly_revealed.append(wl)
 
-	var content := _get_doc_text(d)
-	var snippet := _extract_matching_paragraphs(content, last_query, CONTEXT_PARAGRAPHS)
+	#for w in newly_revealed:
+		#_unlock_word(w)
+
+	var highlight_terms: Array = newly_revealed.duplicate()
+	#if not last_query.is_empty():
+		#highlight_terms.append(last_query)
 
 	evidence_body.clear()
 	evidence_body.bbcode_enabled = true
-	evidence_body.text = _highlight_terms(snippet, [last_query])
+	evidence_body.text = _highlight_terms(par, highlight_terms)
 
-	# ---------------- REVEAL LOGIC ----------------
-	var newly_revealed: Array[String] = []
-
-	# 1) Query-triggered reveal_map
-	var reveal_map: Dictionary = d.get("reveal_map", {})
-	if reveal_map.has(last_query):
-		for w in reveal_map[last_query]:
-			newly_revealed.append(str(w).to_lower())
-
-	# 2) Fallback: always-on-open reveals_words
-	if newly_revealed.size() == 0:
-		var reveals_words: Array = d.get("reveals_words", [])
-		for w in reveals_words:
-			newly_revealed.append(str(w).to_lower())
-
-	# Deduplicate
-	var uniq := {}
-	for w in newly_revealed:
-		uniq[w] = true
-	newly_revealed = []
-	for k in uniq.keys():
-		newly_revealed.append(str(k))
-
-	if newly_revealed.size() == 0:
-		status_label.text = "You found something, but no new keywords stand out."
-	else:
-		for w in newly_revealed:
-			_unlock_word(w)
-		status_label.text = "New keyword(s) added to stack."
-		evidence_body.text = _highlight_terms(snippet, [last_query] + newly_revealed)
-func _get_doc_text(d: Dictionary) -> String:
-	if d.has("text_file"):
-		var path: String = str(d["text_file"])
-		var file = FileAccess.open(path, FileAccess.READ)
-		if file:
-			return file.get_as_text()
-		return "[Error loading file: %s]" % path
-
-	return str(d.get("text", ""))
+	status_label.text = "New keyword(s) added to stack." if newly_revealed.size() > 0 \
+			else "You found something, but no new keywords stand out."
 
 func _unlock_word(word: String) -> void:
 	if unlocked_words.has(word):
 		return
 	unlocked_words[word] = true
-
-	var b := Button.new()
-	b.text = word.to_upper()
-	b.focus_mode = Control.FOCUS_NONE
-	b.pressed.connect(func():
-		status_label.text = "Selected: %s" % word
-	)
-	#word_stack_container.add_child(b)
 	redacted_text.unlock_word(word)
 
-# ---- Index building (visible + full) ----
+# ── Index ─────────────────────────────────────────────────────────────────────
+
 func _rebuild_index() -> void:
 	index.clear()
-	full_index.clear()
+	for key in db.docs:
+		_index_doc(key, db.docs[key])
 
-	for d in docs:
-		_index_doc_into(full_index, d)
+func _index_doc(doc_key: StringName, doc: Doc) -> void:
+	for i in range(doc.paragraphs.size()):
+		var par := doc.paragraphs[i].to_lower()
+		for w in _tokenize(par):
+			_add_to_index(w, doc_key, i)
+		for phrase in SPECIAL_PHRASES:
+			if par.find(phrase) != -1:
+				_add_to_index(phrase, doc_key, i)
 
-		if int(d.get("chapter", 0)) <= current_chapter:
-			_index_doc_into(index, d)
+func _add_to_index(key: String, doc_key: StringName, par_idx: int) -> void:
+	if not index.has(key):
+		index[key] = []
+	var entry := { "doc_key": doc_key, "par_idx": par_idx }
+	for existing in index[key]:
+		if existing.doc_key == doc_key and existing.par_idx == par_idx:
+			return
+	index[key].append(entry)
 
-func _index_doc_into(target_index: Dictionary, d: Dictionary) -> void:
-	var doc_id: String = str(d["id"])
-	var text: String = _get_doc_text(d).to_lower()
-
-	for w in _tokenize(text):
-		_add_to_index(target_index, w, doc_id)
-
-	for phrase in SPECIAL_PHRASES:
-		if text.find(phrase) != -1:
-			_add_to_index(target_index, phrase, doc_id)
-
-func _add_to_index(target_index: Dictionary, key: String, doc_id: String) -> void:
-	if not target_index.has(key):
-		target_index[key] = []
-	if doc_id not in target_index[key]:
-		target_index[key].append(doc_id)
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 func _tokenize(text: String) -> Array[String]:
-	var t := text.to_lower()
+	var t := text
 	for ch in [".", ",", "!", "?", ":", ";", "\"", "'", "(", ")", "[", "]", "\n", "\t", "-", "—"]:
 		t = t.replace(ch, " ")
-	var parts := t.split(" ", false)
-
 	var out: Array[String] = []
-	for p in parts:
+	for p in t.split(" ", false):
 		var w := p.strip_edges()
 		if w.length() >= 2:
 			out.append(w)
 	return out
 
-# ---- Story progression ----
-func advance_chapter() -> void:
-	current_chapter += 1
-	_rebuild_index()
-	results_list.clear()
-	#status_label.text = "Chapter %d unlocked." % (current_chapter + 1)
-
-# ---- Snippet + highlight helpers (TOP-LEVEL, not nested!) ----
-func _extract_matching_paragraphs(text: String, query: String, context: int) -> String:
+func _matching_paragraphs(paragraphs: Array[String], query: String) -> String:
 	if query.is_empty():
-		return text
-
-	var paras := text.split("\n\n", false)
+		return "\n\n".join(paragraphs)
 	var q := query.to_lower()
-
 	var hits: Array[String] = []
-	for i in range(paras.size()):
-		var p := paras[i]
-		if p.to_lower().find(q) != -1:
-			var start: int = max(0, i - context)
-			var end: int = min(paras.size() - 1, i + context)
-			for j in range(start, end + 1):
-				var candidate := paras[j].strip_edges()
-				if candidate.length() > 0 and candidate not in hits:
-					hits.append(candidate)
-
-	if hits.size() == 0:
-		return paras[0] if paras.size() > 0 else text		
+	for par in paragraphs:
+		if par.to_lower().find(q) != -1:
+			var candidate := par.strip_edges()
+			if candidate.length() > 0 and candidate not in hits:
+				hits.append(candidate)
+	if hits.is_empty():
+		return paragraphs[0] if paragraphs.size() > 0 else ""
 	return "\n\n---\n\n".join(hits)
 
 func _highlight_terms(text: String, terms: Array) -> String:
 	var t := text
-
-	terms = terms.duplicate()
-	terms = terms.filter(func(x): return str(x).strip_edges() != "")
-	terms.sort_custom(func(a, b):
-		return str(a).length() > str(b).length()
-	)
-
-	for term_any in terms:
-		var term := str(term_any)
-		if term.is_empty():
-			continue
-		t = _replace_case_insensitive(t, term, "[color=yellow]" + term + "[/color]")
-
+	var filtered: Array = terms.filter(func(x): return str(x).strip_edges() != "")
+	filtered.sort_custom(func(a, b): return str(a).length() > str(b).length())
+	for term_any in filtered:
+		t = _replace_ci(t, str(term_any))
 	return t
 
-func _replace_case_insensitive(haystack: String, needle: String, replacement: String) -> String:
-	var lower_h := haystack.to_lower()
-	var lower_n := needle.to_lower()
-
+func _replace_ci(haystack: String, needle: String) -> String:
+	var escaped := needle
+	for ch in [".", "+", "*", "?", "^", "$", "(", ")", "[", "]", "{", "}", "|", "\\"]:
+		escaped = escaped.replace(ch, "\\" + ch)
+	var regex := RegEx.new()
+	regex.compile("(?i)\\b" + escaped + "\\b")
 	var result := ""
 	var i := 0
-
-	while true:
-		var idx := lower_h.find(lower_n, i)
-		if idx == -1:
-			result += haystack.substr(i)
-			break
-
-		result += haystack.substr(i, idx - i)
-		result += replacement
-		i = idx + needle.length()
-
+	for m in regex.search_all(haystack):
+		result += haystack.substr(i, m.get_start() - i)
+		result += "[url="+m.get_string()+"][color=yellow]" + m.get_string() + "[/color][/url]"
+		i = m.get_end()
+	result += haystack.substr(i)
 	return result
+	#var lower_h := haystack.to_lower()
+	#var lower_n := needle.to_lower()
+	#var result := ""
+	#var i := 0
+	#while true:
+		#var idx := lower_h.find(lower_n, i)
+		#if idx == -1:
+			#result += haystack.substr(i)
+			#break
+		#result += haystack.substr(i, idx - i)
+		#result += replacement
+		#i = idx + needle.length()
+	#return result

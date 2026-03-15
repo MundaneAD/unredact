@@ -1,0 +1,6 @@
+[gd_resource type="Theme" format=3 uid="uid://c8hrds0xs3v1i"]
+
+[ext_resource type="FontFile" uid="uid://dw87kbqa3c5kn" path="res://fonts/IMFellDWPica-Regular.ttf" id="1_3cv62"]
+
+[resource]
+default_font = ExtResource("1_3cv62")

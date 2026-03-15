@@ -1,0 +1,95 @@
+[gd_resource type="Resource" script_class="DocDB" format=3 uid="uid://dr1dl0q8h6isf"]
+
+[ext_resource type="Script" uid="uid://bvm47xm1v0m0w" path="res://scripts/doc.gd" id="1_gu75y"]
+[ext_resource type="Script" uid="uid://bqolki1yfu1xx" path="res://scripts/doc_db.gd" id="2_k4xkr"]
+
+[sub_resource type="Resource" id="Resource_gu75y"]
+script = ExtResource("1_gu75y")
+title = "ACT No. 199 — Criminalistic (Forensic) Textile Examination
+Written April 16, 1959."
+text = "In connection with the criminal case concerning the death of the tourist group led by Dyatlov, a camping tent recovered from the slope of height '1079' was submitted on April 3, 1959 by order of the Prosecutor’s Office of Sverdlovsk Region (reference 16/III-59) for forensic examination. The object of study consisted of a cotton expeditionary tent found at the presumed campsite from which the group departed under circumstances not yet fully established."
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[sub_resource type="Resource" id="Resource_k4xkr"]
+script = ExtResource("1_gu75y")
+title = "ACT No. 199 — Criminalistic (Forensic) Textile Examination
+Written April 16, 1959."
+text = "The examination was assigned to expert-criminalist Churkina H.E., specialist in material trace analysis. The expert was formally warned of criminal liability under Articles 92 and 95 of the RSFSR Criminal Code. The principal questions posed were as follows: (1) whether the tent fabric had been deliberately incised or otherwise mechanically compromised; (2) if so, whether such compromise occurred by action originating within the enclosed interior space or by force applied externally."
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[sub_resource type="Resource" id="Resource_gq2np"]
+script = ExtResource("1_gu75y")
+title = "ACT No. 199 — Criminalistic (Forensic) Textile Examination
+Written April 16, 1959."
+text = "Circumstances Noted in the Case File (For Context Only)
+
+Investigative notes accompanying the tent mention that several bodies were later recovered with irregular or incomplete clothing layers, including reports consistent with [[paradoxical undressing]]. Separate remarks in witness summaries also reference speculative explanations involving [[psychoactive agents]], including the specific term [[LSD]]. These references are recorded here only as contextual background and are not evaluated within the scope of this textile examination. Likewise, theories involving [[panic]], [[delirium]], [[infrasound]], [[avalanche]], [[military testing]], or other external factors do not alter the physical conclusions below regarding the nature and direction of the fabric damage."
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[sub_resource type="Resource" id="Resource_is2xw"]
+script = ExtResource("1_gu75y")
+title = "ACT No. 199 — Criminalistic (Forensic) Textile Examination
+Written April 16, 1959."
+text = "Condition of the Object Presented
+
+The tent was received in a crumpled and partially collapsed state, bearing multiple deformations consistent with transport and environmental exposure. In order to approximate the original spatial configuration, the tent was reconstructed and erected with assistance from a professional hiker, who provided guidance regarding customary pitching method. Following reassembly, the textile structure was measured and documented.
+The tent is constructed of dense cotton fabric of protective coloration, with total ridge length measuring approximately 4 meters 33 centimeters. Side height averages 1 meter 14 centimeters. The left terminal opening serves as entry and is reinforced internally by sheet material. The right terminal end contains a circular ventilating aperture. Numerous loops and fastening points are affixed along the lower margins. General wear consistent with expeditionary use is evident."
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[sub_resource type="Resource" id="Resource_s4iw0"]
+script = ExtResource("1_gu75y")
+title = "ACT No. 199 — Criminalistic (Forensic) Textile Examination
+Written April 16, 1959."
+text = "Observed Textile Damage
+
+Upon systematic inspection, multiple areas of textile disruption were identified, particularly along the right slope of the canopy forming the roof section. These disruptions varied in morphology, length, and fiber separation pattern. While many exhibited characteristics typical of tensile failure—namely elongation of threads along the axis of least resistance—three particular disruptions, conditionally designated as No. 1, No. 2, and No. 3, demonstrated markedly different structural qualities.
+
+In woven fabric, structural integrity is maintained through perpendicular interlacing of warp and weft threads. Mechanical tearing under stress typically follows the weaker directional alignment of threads, producing relatively straight, right-angled separation with elongated filament ends. By contrast, disruption produced by a sharp implement frequently results in transverse severance of both warp and weft threads at irregular angles, with comparatively even thread termini and absence of progressive fiber stretching.
+
+Damage No. 1 presented as a broken linear opening measuring approximately 32 centimeters in length. Damage No. 2 extended in irregular arcuate fashion for approximately 89 centimeters. Damage No. 3 measured approximately 42 centimeters. In all three cases, thread ends appeared sharply divided rather than elongated, and both warp and weft systems were interrupted at varying angles. These characteristics are consistent with fabric being [[cut open]] by a sharp-edged implement rather than separated by pure tensile force."
+reveals_words = Array[String](["cut open"])
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[sub_resource type="Resource" id="Resource_uw7dp"]
+script = ExtResource("1_gu75y")
+title = "ACT No. 199 — Criminalistic (Forensic) Textile Examination
+Written April 16, 1959."
+text = "Microscopic Examination
+To determine directionality of action, microscopic examination was conducted at magnifications ranging from 0.6× to 56×. Particular attention was paid to fiber beveling, surface scoring, and presence of micro-abrasions adjacent to the severed margins.
+On the interior-facing surfaces adjacent to the aforementioned disruptions, numerous minute linear scratches, puncture-like impressions, and partial filament incisions were identified. These markings appeared rectilinear and directional, frequently terminating at the margins of the principal openings. In several instances, pigment abrasion was visible along the internal-facing fibers, suggesting sliding contact of a metallic blade against the interior textile surface prior to or during penetration.
+Conversely, corresponding external surfaces lacked comparable directional micro-scoring contiguous with the principal severance margins. The continuation scratches observed at interior puncture angles did not extend outward beyond the plane of textile thickness. This asymmetry of trace distribution indicates that the incising implement progressed outward through the fabric plane rather than inward.
+The cumulative pattern of micro-trace evidence therefore supports the conclusion that the three primary textile disruptions were executed [[from the inside]] of the enclosed tent space, with the cutting edge contacting the interior surface first and exiting through the external surface."
+reveals_words = Array[String](["from the inside"])
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[sub_resource type="Resource" id="Resource_luu5e"]
+script = ExtResource("1_gu75y")
+title = "ACT No. 199 — Criminalistic (Forensic) Textile Examination
+Written April 16, 1959."
+text = "Conclusion
+Within the right sloping roof section of the tent belonging to the Dyatlov group, three principal textile disruptions measuring approximately 32 cm, 89 cm, and 42 cm are identified as incisions made by a sharp-edged implement. Based on microscopic trace analysis and distribution of internal scoring, these incisions were performed from the interior of the tent outward. Remaining fabric disruptions observed elsewhere on the structure are consistent with tensile tearing resulting from environmental stress or mechanical strain and are not attributable to blade action."
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[sub_resource type="Resource" id="Resource_vyhr1"]
+script = ExtResource("1_gu75y")
+title = "Dyatlov Pass — Consolidated Autopsy File (Investigative Revision)"
+text = "Autopsy Report — Rustem Vladimirovich Slobodin
+
+Act No. 5. Examination conducted March 8, 1959, at the Regional Bureau of Forensic Medicine. The body of Slobodin Rustem Vladimirovich, age twenty‑three, was presented for post‑mortem examination following recovery from mountainous terrain under winter conditions. The deceased was reportedly part of a hiking expedition whose members perished under undetermined circumstances.
+External inspection revealed a young adult male of athletic build, found in a partially flexed posture. The upper extremities were drawn inward, fingers contracted, suggesting terminal muscular rigidity or collapse during attempted locomotion. The lower limbs were asymmetrically bent. Body was received with insulated [[ski pants]] fastened with a button and a belt. In the pockets are a pack of matches with 43 match sticks, a pocket knife on a long string, a comb in a case, two pieces of string, a pencil, and a cotton sock. Such redistribution of garments may indicate environmental stress or disorientation.
+"
+metadata/_custom_type_script = "uid://bvm47xm1v0m0w"
+
+[resource]
+script = ExtResource("2_k4xkr")
+docs = Dictionary[StringName, ExtResource("1_gu75y")]({
+&"act_99_0": SubResource("Resource_gu75y"),
+&"act_99_1": SubResource("Resource_k4xkr"),
+&"act_99_2": SubResource("Resource_gq2np"),
+&"act_99_3": SubResource("Resource_is2xw"),
+&"act_99_4": SubResource("Resource_s4iw0"),
+&"act_99_5": SubResource("Resource_uw7dp"),
+&"act_99_6": SubResource("Resource_luu5e"),
+&"autopsy_0": SubResource("Resource_vyhr1")
+})
+metadata/_custom_type_script = "uid://bqolki1yfu1xx"

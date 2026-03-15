@@ -1,15 +1,11 @@
-# search_engine.gd — attach to nothing, instantiate as a resource/node or preload
+# lib_lib.gd
 class_name LibLib
 extends RefCounted
 
-var db = preload("res://scripts/evidence_db.gd").new()
-var docs: Array = []
-var docs_by_id: Dictionary = {}
+const DB_PATH := "res://data/doc_db.tres"
 
+var db: DocDB
 var index: Dictionary = {}
-var full_index: Dictionary = {}
-var current_chapter: int = 0
-
 var unlocked_words: Dictionary = {}
 var opened_docs: Dictionary = {}
 
@@ -23,139 +19,109 @@ var SPECIAL_PHRASES := [
 ]
 
 func _init() -> void:
-	docs = db.DOCS
-	for d in docs:
-		docs_by_id[str(d["id"])] = d
+	db = ResourceLoader.load(DB_PATH)
 	_rebuild_index()
 
-# ---- Public API ----
+# ── Public API ────────────────────────────────────────────────────────────────
 
-## Returns { "status": String, "results": Array[Dictionary] }
-## Each result: { "doc_id": String, "title": String }
 func search(query: String) -> Dictionary:
 	var q := query.strip_edges().to_lower()
 	if q.is_empty():
 		return { "status": "Type something to search.", "results": [] }
 
 	if not index.has(q):
-		if full_index.has(q):
-			return { "status": "Records found, but access is restricted (advance the story).", "results": [] }
 		return { "status": "No results for '%s'." % q, "results": [] }
 
-	var doc_ids: Array = index[q].duplicate()
-	doc_ids.sort_custom(func(a, b):
-		return str(docs_by_id[str(a)].get("title", "")) < str(docs_by_id[str(b)].get("title", ""))
+	var keys: Array = index[q].duplicate()
+	keys.sort_custom(func(a, b):
+		return str(db.docs[a].title) < str(db.docs[b].title)
 	)
 
 	var results: Array = []
-	for doc_id in doc_ids:
-		var d: Dictionary = docs_by_id[str(doc_id)]
-		results.append({ "doc_id": str(doc_id), "title": str(d.get("title", "Evidence")) })
+	for key in keys:
+		results.append({ "doc_id": str(key), "title": db.docs[key].title })
 
 	return { "status": "%d result(s) for '%s'." % [results.size(), q], "results": results }
 
-## Returns { "title": String, "body_bbcode": String, "new_words": Array[String], "status": String }
 func open_doc(doc_id: String, query: String) -> Dictionary:
-	if not docs_by_id.has(doc_id):
+	var key := StringName(doc_id)
+	if not db.docs.has(key):
 		return { "title": "", "body_bbcode": "", "new_words": [], "status": "Could not open document." }
 
-	var d: Dictionary = docs_by_id[doc_id]
+	var doc: Doc = db.docs[key]
 	var q := query.strip_edges().to_lower()
 	opened_docs[doc_id] = true
 
-	var title := str(d.get("title", "Evidence"))
-	var content := _get_doc_text(d)
-	var snippet := _extract_matching_paragraphs(content, q, 0)
+	var hits: Array[String] = []
+	var newly_revealed: Array[String] = []
+	var seen := {}
 
-	var newly_revealed := _get_revealed_words(d, q)
+	for i in range(doc.paragraphs.size()):
+		var par := doc.paragraphs[i]
+		if q.is_empty() or par.to_lower().find(q) != -1:
+			var candidate := par.strip_edges()
+			if candidate.length() > 0 and candidate not in hits:
+				hits.append(candidate)
+			for w in doc.reveals_words[i]:
+				var wl := str(w).to_lower()
+				if not unlocked_words.has(wl) and not seen.has(wl):
+					seen[wl] = true
+					newly_revealed.append(wl)
+
+	var snippet := "\n\n---\n\n".join(hits) if hits.size() > 0 \
+			else (doc.paragraphs[0] if doc.paragraphs.size() > 0 else "")
 
 	for w in newly_revealed:
 		unlocked_words[w] = true
 
-	var status: String
-	if newly_revealed.size() == 0:
-		status = "You found something, but no new keywords stand out."
-	else:
-		status = "New keyword(s) added to stack."
-
-	var highlight_terms: Array = [q] + newly_revealed
-	var body_bbcode := _highlight_terms(snippet, highlight_terms)
+	var highlight_terms: Array = newly_revealed.duplicate()
+	if not q.is_empty():
+		highlight_terms.append(q)
 
 	return {
-		"title": title,
-		"body_bbcode": body_bbcode,
+		"title": doc.title,
+		"body_bbcode": _highlight_terms(snippet, highlight_terms),
 		"new_words": newly_revealed,
-		"status": status
+		"status": "New keyword(s) added to stack." if newly_revealed.size() > 0 \
+				  else "You found something, but no new keywords stand out."
 	}
-
-func advance_chapter() -> void:
-	current_chapter += 1
-	_rebuild_index()
 
 func is_word_unlocked(word: String) -> bool:
 	return unlocked_words.has(word.to_lower())
 
-# ---- Internal ----
+# ── Internal ──────────────────────────────────────────────────────────────────
 
-func _get_revealed_words(d: Dictionary, query: String) -> Array[String]:
-	var newly: Array[String] = []
-
-	var reveal_map: Dictionary = d.get("reveal_map", {})
-	if reveal_map.has(query):
-		for w in reveal_map[query]:
-			var wl := str(w).to_lower()
-			if not unlocked_words.has(wl):
-				newly.append(wl)
-
-	if newly.size() == 0:
-		for w in d.get("reveals_words", []):
-			var wl := str(w).to_lower()
-			if not unlocked_words.has(wl):
-				newly.append(wl)
-
-	# Deduplicate
-	var uniq := {}
-	for w in newly:
-		uniq[w] = true
+func _get_revealed_words(doc: Doc) -> Array[String]:
+	var seen := {}
 	var out: Array[String] = []
-	for k in uniq.keys():
-		out.append(str(k))
+	for w in doc.reveals_words:
+		var wl := str(w).to_lower()
+		if not unlocked_words.has(wl) and not seen.has(wl):
+			seen[wl] = true
+			out.append(wl)
 	return out
-
-func _get_doc_text(d: Dictionary) -> String:
-	if d.has("text_file"):
-		var path: String = str(d["text_file"])
-		var file = FileAccess.open(path, FileAccess.READ)
-		if file:
-			return file.get_as_text()
-		return "[Error loading file: %s]" % path
-	return str(d.get("text", ""))
 
 func _rebuild_index() -> void:
 	index.clear()
-	full_index.clear()
-	for d in docs:
-		_index_doc_into(full_index, d)
-		if int(d.get("chapter", 0)) <= current_chapter:
-			_index_doc_into(index, d)
+	for key in db.docs:
+		_index_doc(key, db.docs[key])
 
-func _index_doc_into(target: Dictionary, d: Dictionary) -> void:
-	var doc_id := str(d["id"])
-	var text := _get_doc_text(d).to_lower()
-	for w in _tokenize(text):
-		_add_to_index(target, w, doc_id)
-	for phrase in SPECIAL_PHRASES:
-		if text.find(phrase) != -1:
-			_add_to_index(target, phrase, doc_id)
+func _index_doc(doc_key: StringName, doc: Doc) -> void:
+	for par in doc.paragraphs:
+		for w in _tokenize(par.to_lower()):
+			_add_to_index(w, doc_key)
+		for phrase in SPECIAL_PHRASES:
+			if par.to_lower().find(phrase) != -1:
+				_add_to_index(phrase, doc_key)
 
-func _add_to_index(target: Dictionary, key: String, doc_id: String) -> void:
-	if not target.has(key):
-		target[key] = []
-	if doc_id not in target[key]:
-		target[key].append(doc_id)
+func _add_to_index(key: String, doc_key: StringName) -> void:
+	if not index.has(key):
+		index[key] = []
+	if doc_key not in index[key]:
+		index[key].append(doc_key)
 
 func _tokenize(text: String) -> Array[String]:
-	var t := text.to_lower()
+	var t := text
 	for ch in [".", ",", "!", "?", ":", ";", "\"", "'", "(", ")", "[", "]", "\n", "\t", "-", "—"]:
 		t = t.replace(ch, " ")
 	var out: Array[String] = []
@@ -165,22 +131,18 @@ func _tokenize(text: String) -> Array[String]:
 			out.append(w)
 	return out
 
-func _extract_matching_paragraphs(text: String, query: String, context: int) -> String:
+func _matching_paragraphs(paragraphs: Array[String], query: String) -> String:
 	if query.is_empty():
-		return text
-	var paras := text.split("\n\n", false)
+		return "\n\n".join(paragraphs)
 	var q := query.to_lower()
 	var hits: Array[String] = []
-	for i in range(paras.size()):
-		if paras[i].to_lower().find(q) != -1:
-			var start: int = max(0, i - context)
-			var end_i: int = min(paras.size() - 1, i + context)
-			for j in range(start, end_i + 1):
-				var candidate := paras[j].strip_edges()
-				if candidate.length() > 0 and candidate not in hits:
-					hits.append(candidate)
-	if hits.size() == 0:
-		return paras[0] if paras.size() > 0 else text
+	for par in paragraphs:
+		if par.to_lower().find(q) != -1:
+			var candidate := par.strip_edges()
+			if candidate.length() > 0 and candidate not in hits:
+				hits.append(candidate)
+	if hits.is_empty():
+		return paragraphs[0] if paragraphs.size() > 0 else ""
 	return "\n\n---\n\n".join(hits)
 
 func _highlight_terms(text: String, terms: Array) -> String:
@@ -188,21 +150,33 @@ func _highlight_terms(text: String, terms: Array) -> String:
 	var filtered: Array = terms.filter(func(x): return str(x).strip_edges() != "")
 	filtered.sort_custom(func(a, b): return str(a).length() > str(b).length())
 	for term_any in filtered:
-		var term := str(term_any)
-		t = _replace_ci(t, term, "[color=yellow]" + term + "[/color]")
+		t = _replace_ci(t, str(term_any))
 	return t
 
-func _replace_ci(haystack: String, needle: String, replacement: String) -> String:
-	var lower_h := haystack.to_lower()
-	var lower_n := needle.to_lower()
+func _replace_ci(haystack: String, needle: String) -> String:
+	var escaped := needle
+	for ch in [".", "+", "*", "?", "^", "$", "(", ")", "[", "]", "{", "}", "|", "\\"]:
+		escaped = escaped.replace(ch, "\\" + ch)
+	var regex := RegEx.new()
+	regex.compile("(?i)\\b" + escaped + "\\b")
 	var result := ""
 	var i := 0
-	while true:
-		var idx := lower_h.find(lower_n, i)
-		if idx == -1:
-			result += haystack.substr(i)
-			break
-		result += haystack.substr(i, idx - i)
-		result += replacement
-		i = idx + needle.length()
+	for m in regex.search_all(haystack):
+		result += haystack.substr(i, m.get_start() - i)
+		result += "[color=yellow]" + m.get_string() + "[/color]"
+		i = m.get_end()
+	result += haystack.substr(i)
 	return result
+	#var lower_h := haystack.to_lower()
+	#var lower_n := needle.to_lower()
+	#var result := ""
+	#var i := 0
+	#while true:
+		#var idx := lower_h.find(lower_n, i)
+		#if idx == -1:
+			#result += haystack.substr(i)
+			#break
+		#result += haystack.substr(i, idx - i)
+		#result += replacement
+		#i = idx + needle.length()
+	#return result

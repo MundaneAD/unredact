@@ -7,6 +7,7 @@ extends Control
 @export var char_width_estimate: float = 10.0
 @export var font_size: int = 18
 @export var redact_color: Color = Color.BLACK
+@onready var audio_stream_player: AudioStreamPlayer = $AudioStreamPlayer
 
 @export var _word_bank: HFlowContainer
 var _slots: Array = []
@@ -23,6 +24,7 @@ func _ready() -> void:
 	
 	flow.add_theme_constant_override("h_separation", 5)
 	flow.add_theme_constant_override("v_separation", 8)
+
 	add_child(flow)
 	_parse_into_flow(flow)
 
@@ -35,13 +37,50 @@ func _ready() -> void:
 	#words.shuffle()
 	#for word in words:
 		#_word_bank.add_child(_make_chip(word))
+@onready var color_rect: ColorRect = $"../.."
 
 func unlock_word(word):
-	_word_bank.add_child(_make_chip(word))
+	var chip := _make_chip(word)
+	_word_bank.add_child(chip)
+	
+	chip.modulate.a = 0.0
+	audio_stream_player.play()
+
+	# wait a frame so the chip has been laid out and has a valid position
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var target_pos := chip.global_position
+
+	# overlay chip starting at mouse position
+	var overlay := _make_chip(word)
+	overlay.theme = color_rect.theme
+	var ft = color_rect.theme.default_font
+	overlay.theme.default_font = ft
+	
+	overlay.global_position = get_viewport().get_mouse_position()
+	get_tree().current_scene.add_child(overlay)
+
+	# hide the real chip until animation lands
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(overlay, "global_position", target_pos, 0.4)
+	await tween.finished
+
+	chip.modulate.a = 1.0
+	overlay.queue_free()
 
 func _parse_into_flow(parent) -> void:
-	for line in source_text.split("\n", false):
+	for line in source_text.split("\n", true):
+		if line.strip_edges() == "":
+			var spacer := Control.new()
+			spacer.custom_minimum_size = Vector2(0, font_size)
+			parent.add_child(spacer)
+			continue
 		var flow := HFlowContainer.new()
+		flow.last_wrap_alignment = FlowContainer.LAST_WRAP_ALIGNMENT_BEGIN
 		flow.add_theme_constant_override("separation", 5)
 		parent.add_child(flow)
 		_parse_line_into_flow(flow, line)
@@ -73,7 +112,7 @@ func _make_label(text: String) -> Label:
 	lbl.size_flags_vertical = SIZE_SHRINK_CENTER
 	lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	lbl.size_flags_horizontal = Control.SIZE_EXPAND
+	#lbl.size_flags_horizontal = Control.SIZE_EXPAND
 	lbl.visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
 	return lbl
 
@@ -81,10 +120,10 @@ func _make_slot(word: String) -> PanelContainer:
 	var slot := PanelContainer.new()
 	slot.set_meta("word", word)
 	slot.set_meta("filled", false)
-	slot.custom_minimum_size = Vector2(
-		max(float(word.length()) * char_width_estimate, 40.0) + 16.0,
-		float(font_size) + 14.0
-	)
+	#slot.custom_minimum_size = Vector2(
+		#max(float(word.length()) * char_width_estimate, 40.0) ,
+		#float(font_size) 
+	#)
 
 	var style := StyleBoxFlat.new()
 	style.bg_color = redact_color
@@ -95,7 +134,10 @@ func _make_slot(word: String) -> PanelContainer:
 	lbl.add_theme_font_size_override("font_size", font_size)
 	lbl.set_anchors_and_offsets_preset(PRESET_CENTER)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.visible = false
+	slot.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	#lbl.visible = false
+	lbl.modulate.a = 0
+	
 	slot.add_child(lbl)
 
 	slot.set_drag_forwarding(Callable(), _slot_can_drop.bind(slot), _slot_drop.bind(slot))
@@ -135,11 +177,11 @@ func _chip_get_drag_data(_pos: Vector2, chip: PanelContainer) -> Variant:
 	return {"word": chip.get_meta("word"), "chip": chip}
 
 func _slot_can_drop(_pos: Vector2, data: Variant, slot: PanelContainer) -> bool:
-	return not slot.get_meta("filled") and data.get("word", "") == slot.get_meta("word")
+	return not slot.get_meta("filled") and data.get("word", "").to_lower() == slot.get_meta("word").to_lower()
 
 func _slot_drop(_pos: Vector2, data: Variant, slot: PanelContainer) -> void:
 	slot.set_meta("filled", true)
-	slot.get_child(0).visible = true
+	slot.get_child(0).modulate.a = 1
 	var style := slot.get_theme_stylebox("panel") as StyleBoxFlat
 	style.bg_color = Color(0.2, 0.6, 0.3)  # green to show success
 	var chip: PanelContainer = data.get("chip")
