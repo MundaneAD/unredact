@@ -4,6 +4,7 @@ extends SceneTree
 const INPUT_DIR  := "res://docs/"
 const OUTPUT_RES := "res://data/doc_db.tres"
 
+
 func _init() -> void:
 	var db := DocDB.new()
 	var dir := DirAccess.open(INPUT_DIR)

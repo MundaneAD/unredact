@@ -111,7 +111,7 @@ func _make_label(text: String) -> Label:
 	lbl.add_theme_font_size_override("font_size", font_size)
 	lbl.size_flags_vertical = SIZE_SHRINK_CENTER
 	lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	#lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	#lbl.size_flags_horizontal = Control.SIZE_EXPAND
 	lbl.visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
 	return lbl
